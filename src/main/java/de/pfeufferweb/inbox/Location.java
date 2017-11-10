@@ -10,7 +10,7 @@ public class Location {
         this.uri = uri;
     }
 
-    public URI getUri() {
-        return uri;
+    public String getLocation() {
+        return uri.getRawPath();
     }
 }
