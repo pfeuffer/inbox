@@ -1,0 +1,44 @@
+package de.pfeufferweb.inbox;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.io.IOException;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+public class FileScannerTest {
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
+    @Mock
+    private Inbox inbox;
+    @InjectMocks
+    private FileScanner fileScanner;
+
+    @Test
+    public void shouldHandleEmptyDirectory() throws IOException {
+        fileScanner.scan(folder.getRoot().getAbsolutePath());
+        verify(inbox, never()).register(any());
+    }
+
+    @Test
+    public void shouldFindSingleFile() throws IOException {
+        folder.newFile("something.pdf");
+        fileScanner.scan(folder.getRoot().getAbsolutePath());
+        verify(inbox).register(any(Document.class));
+    }
+
+    @Before
+    public void init() {
+        initMocks(this);
+    }
+}
