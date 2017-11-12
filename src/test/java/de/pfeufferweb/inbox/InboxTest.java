@@ -53,6 +53,19 @@ public class InboxTest {
         assertThat(result.getItems().size(), is(3));
     }
 
+    @Test
+    public void shouldUseImplicitDisjunction() {
+        Inbox inbox = new Inbox();
+        inbox.register(mockDocument("This is a rather small document", "in/other/path"));
+        inbox.register(mockDocument("This is a simple document", "in/some/path"));
+        inbox.register(mockDocument("Neither small nor simple", "in/some/path"));
+        inbox.register(mockDocument("And something really big", "in/some/path"));
+
+        SearchResult result = inbox.search("small simple");
+
+        assertThat(result.getItems().size(), is(3));
+    }
+
     private Document mockDocument(String content, String path) {
         Document mock = mock(Document.class);
         when(mock.getContent()).thenReturn(content);
