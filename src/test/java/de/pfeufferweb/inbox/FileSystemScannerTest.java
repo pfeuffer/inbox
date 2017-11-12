@@ -15,7 +15,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class FileScannerTest {
+public class FileSystemScannerTest {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -25,11 +25,11 @@ public class FileScannerTest {
     @Mock
     private DocumentScanner documentScanner;
     @InjectMocks
-    private FileScanner fileScanner;
+    private FileSystemScanner fileSystemScanner;
 
     @Test
     public void shouldHandleEmptyDirectory() throws IOException {
-        fileScanner.scan(folder.getRoot().getAbsolutePath());
+        fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
 
         verify(inbox, never()).register(any());
     }
@@ -38,7 +38,7 @@ public class FileScannerTest {
     public void shouldFindSingleFile() throws IOException {
         folder.newFile("something.pdf");
 
-        fileScanner.scan(folder.getRoot().getAbsolutePath());
+        fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
 
         verify(inbox).register(any(Document.class));
     }
@@ -48,7 +48,7 @@ public class FileScannerTest {
         File subdir = folder.newFolder("subdir");
         new File(subdir, "something.pdf").createNewFile();
 
-        fileScanner.scan(folder.getRoot().getAbsolutePath());
+        fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
 
         verify(inbox).register(any(Document.class));
     }

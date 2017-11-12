@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/index")
 public class InboxController {
-    private final FileScanner fileScanner;
+    private final FileSystemScanner fileSystemScanner;
     private final Inbox inbox;
 
     @Autowired
-    public InboxController(FileScanner fileScanner, Inbox inbox) {
-        this.fileScanner = fileScanner;
+    public InboxController(FileSystemScanner fileSystemScanner, Inbox inbox) {
+        this.fileSystemScanner = fileSystemScanner;
         this.inbox = inbox;
     }
 
     @PostMapping
     public void add(@RequestParam(name = "directory", required = true) String directory) {
-        fileScanner.scan(directory);
+        fileSystemScanner.scan(directory);
     }
 
     @GetMapping

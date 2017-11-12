@@ -12,15 +12,15 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @Component
-public class FileScanner {
+public class FileSystemScanner {
 
-    private static Log LOG = LogFactory.getLog(FileScanner.class);
+    private static Log LOG = LogFactory.getLog(FileSystemScanner.class);
 
     private final Inbox inbox;
     private final DocumentScanner documentScanner;
 
     @Autowired
-    public FileScanner(Inbox inbox, DocumentScanner documentScanner) {
+    public FileSystemScanner(Inbox inbox, DocumentScanner documentScanner) {
         this.inbox = inbox;
         this.documentScanner = documentScanner;
     }
