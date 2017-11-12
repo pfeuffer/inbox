@@ -8,7 +8,7 @@ import java.nio.file.Path;
 @Component
 public class DocumentScanner {
 
-    public Document scan(Path file) {
+    public Document read(Path file) {
         try {
             String content = new Tika().parseToString(file.toFile());
             return new Document(new Location(file.toAbsolutePath().toUri()), content);

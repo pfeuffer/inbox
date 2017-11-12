@@ -13,7 +13,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -25,7 +25,12 @@ import java.util.stream.Collectors;
 public class Inbox {
 
     private final StandardAnalyzer analyzer = new StandardAnalyzer();
-    private final Directory index = new RAMDirectory();
+    private final Directory index;
+
+    @Autowired
+    public Inbox(Directory index) {
+        this.index = index;
+    }
 
     public void register(Document document) {
         try {
@@ -61,7 +66,7 @@ public class Inbox {
     }
 
     private SearchResult.SearchItem createSearchItem(IndexSearcher indexSearcher, ScoreDoc d) {
-        return new SearchResult.SearchItem(readField(indexSearcher, d, "location"), readField(indexSearcher, d, "content"));
+        return new SearchResult.SearchItem(readField(indexSearcher, d, "content"), readField(indexSearcher, d, "location"));
     }
 
     private String readField(IndexSearcher indexSearcher, ScoreDoc doc, String field) {

@@ -22,7 +22,7 @@ public class DocumentScannerTest {
     public void shouldParseWordFile() throws IOException {
         Path wordFile = copy("Simple_word_file.docx");
 
-        Document wordDocument = new DocumentScanner().scan(wordFile);
+        Document wordDocument = new DocumentScanner().read(wordFile);
 
         assertThat(cleanedContent(wordDocument), is(equalTo("Simple word file")));
         assertThat(wordDocument.getLocation().getLocation()
@@ -33,7 +33,7 @@ public class DocumentScannerTest {
     public void shouldParsePdfFile() throws IOException {
         Path pdfFile = copy("Simple_pdf_file.pdf");
 
-        Document wordDocument = new DocumentScanner().scan(pdfFile);
+        Document wordDocument = new DocumentScanner().read(pdfFile);
 
         assertThat(cleanedContent(wordDocument), is(equalTo("Simple word file")));
         assertThat(wordDocument.getLocation().getLocation()

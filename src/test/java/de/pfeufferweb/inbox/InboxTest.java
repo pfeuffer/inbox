@@ -1,5 +1,6 @@
 package de.pfeufferweb.inbox;
 
+import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
@@ -9,9 +10,10 @@ import static org.mockito.Mockito.when;
 
 public class InboxTest {
 
+    private Inbox inbox = new Inbox(new RAMDirectory());
+
     @Test
     public void shouldFindNothingIfNoMatchExists() {
-        Inbox inbox = new Inbox();
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
 
         SearchResult result = inbox.search("complex");
@@ -21,7 +23,6 @@ public class InboxTest {
 
     @Test
     public void shouldFindExistingItem() {
-        Inbox inbox = new Inbox();
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
 
         SearchResult result = inbox.search("document");
@@ -31,7 +32,6 @@ public class InboxTest {
 
     @Test
     public void shouldFindCorrectItemWithConjunction() {
-        Inbox inbox = new Inbox();
         inbox.register(mockDocument("This is a rather small document", "in/other/path"));
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
 
@@ -42,7 +42,6 @@ public class InboxTest {
 
     @Test
     public void shouldFindCorrectItemsWithDisjunction() {
-        Inbox inbox = new Inbox();
         inbox.register(mockDocument("This is a rather small document", "in/other/path"));
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
         inbox.register(mockDocument("Neither small nor simple", "in/some/path"));
@@ -55,7 +54,6 @@ public class InboxTest {
 
     @Test
     public void shouldUseImplicitDisjunction() {
-        Inbox inbox = new Inbox();
         inbox.register(mockDocument("This is a rather small document", "in/other/path"));
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
         inbox.register(mockDocument("Neither small nor simple", "in/some/path"));

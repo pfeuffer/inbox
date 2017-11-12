@@ -46,7 +46,7 @@ public class FileScanner {
     private void handle(Path path) {
         LOG.info("handling " + path);
         if (Files.isRegularFile(path)) {
-            inbox.register(documentScanner.scan(path));
+            inbox.register(documentScanner.read(path));
         } else if (Files.isDirectory(path)) {
             this.scan(path);
         }
