@@ -5,9 +5,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 @Component
 public class FileScanner {
@@ -24,14 +26,29 @@ public class FileScanner {
     }
 
     public void scan(String directory) {
-        LOG.info("scanning " + directory);
         Path path = Paths.get(directory);
-        path.forEach(this::handle);
+        scan(path);
+    }
+
+    private void scan(Path path) {
+        LOG.info("scanning " + path);
+        list(path).forEach(this::handle);
+    }
+
+    private Stream<Path> list(Path path) {
+        try {
+            return Files.list(path);
+        } catch (IOException e) {
+            throw new RuntimeException("could not list directory " + path, e);
+        }
     }
 
     private void handle(Path path) {
+        LOG.info("handling " + path);
         if (Files.isRegularFile(path)) {
             inbox.register(documentScanner.scan(path));
+        } else if (Files.isDirectory(path)) {
+            this.scan(path);
         }
     }
 }
