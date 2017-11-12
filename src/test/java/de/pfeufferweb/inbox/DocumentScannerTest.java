@@ -35,7 +35,7 @@ public class DocumentScannerTest {
 
         Document wordDocument = new DocumentScanner().read(pdfFile);
 
-        assertThat(cleanedContent(wordDocument), is(equalTo("Simple word file")));
+        assertThat(cleanedContent(wordDocument), is(equalTo("Simple pdf file")));
         assertThat(wordDocument.getLocation().getLocation()
                 .endsWith("Simple_pdf_file.pdf"), is(true));
     }
