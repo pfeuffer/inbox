@@ -16,6 +16,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import java.io.IOException;
 import java.nio.file.FileSystems;
 
+import static java.util.Arrays.asList;
+
 @SpringBootApplication
 public class InboxApplication {
 
@@ -48,5 +50,13 @@ class LuceneConfiguration {
     @Profile("ram")
     public Directory ramLuceneDirectory() {
         return new RAMDirectory();
+    }
+}
+
+@Configuration
+class FileTypeConfiguration {
+    @Bean
+    public FileTypeChecker supportedFileTypes(@Value("${filetypes}") String filetypes) {
+        return new FileTypeChecker(asList(filetypes.toLowerCase().trim().split("\\s*,\\s*")));
     }
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class FileSystemScannerTest {
@@ -24,6 +25,8 @@ public class FileSystemScannerTest {
     private Inbox inbox;
     @Mock
     private DocumentScanner documentScanner;
+    @Mock
+    FileTypeChecker checker;
     @InjectMocks
     private FileSystemScanner fileSystemScanner;
 
@@ -36,6 +39,7 @@ public class FileSystemScannerTest {
 
     @Test
     public void shouldFindSingleFile() throws IOException {
+        when(checker.supported("something.pdf")).thenReturn(true);
         folder.newFile("something.pdf");
 
         fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
@@ -45,6 +49,7 @@ public class FileSystemScannerTest {
 
     @Test
     public void shouldTraverseInSubDirectories() throws IOException {
+        when(checker.supported("something.pdf")).thenReturn(true);
         File subdir = folder.newFolder("subdir");
         new File(subdir, "something.pdf").createNewFile();
 

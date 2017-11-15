@@ -18,11 +18,13 @@ public class FileSystemScanner {
 
     private final Inbox inbox;
     private final DocumentScanner documentScanner;
+    private final FileTypeChecker fileTypeChecker;
 
     @Autowired
-    public FileSystemScanner(Inbox inbox, DocumentScanner documentScanner) {
+    public FileSystemScanner(Inbox inbox, DocumentScanner documentScanner, FileTypeChecker fileTypeChecker) {
         this.inbox = inbox;
         this.documentScanner = documentScanner;
+        this.fileTypeChecker = fileTypeChecker;
     }
 
     public void scan(String directory) {
@@ -32,7 +34,12 @@ public class FileSystemScanner {
 
     private void scan(Path path) {
         LOG.info("scanning " + path);
-        list(path).forEach(this::handle);
+        list(path).filter(Files::isRegularFile).filter(this::supportedFiletype).forEach(f -> inbox.register(documentScanner.read(f)));
+        list(path).filter(Files::isDirectory).forEach(this::scan);
+    }
+
+    private boolean supportedFiletype(Path path) {
+        return fileTypeChecker.supported(path.getFileName().toString());
     }
 
     private Stream<Path> list(Path path) {
@@ -40,15 +47,6 @@ public class FileSystemScanner {
             return Files.list(path);
         } catch (IOException e) {
             throw new RuntimeException("could not list directory " + path, e);
-        }
-    }
-
-    private void handle(Path path) {
-        LOG.info("handling " + path);
-        if (Files.isRegularFile(path)) {
-            inbox.register(documentScanner.read(path));
-        } else if (Files.isDirectory(path)) {
-            this.scan(path);
         }
     }
 }
