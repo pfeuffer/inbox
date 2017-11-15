@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Search Result</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<p th:text="'We found ' + ${size} + ' documents!'"></p>
+<!--@thymesVar id="items" type="de.pfeufferweb.inbox.SearchResult.SearchItem"-->
+<ul th:each="item : ${items}">
+    <li>
+        <span th:text="${item.location}">nothing</span>
+        <br/>
+        <span th:text="${item.content}">nothing</span>
+    </li>
+</ul>
+</body>
+</html>
