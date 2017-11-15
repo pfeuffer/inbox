@@ -44,8 +44,8 @@ public class InboxTest {
     public void shouldFindCorrectItemsWithDisjunction() {
         inbox.register(mockDocument("This is a rather small document", "in/other/path"));
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
-        inbox.register(mockDocument("Neither small nor simple", "in/some/path"));
-        inbox.register(mockDocument("And something really big", "in/some/path"));
+        inbox.register(mockDocument("Neither small nor simple", "in/further/path"));
+        inbox.register(mockDocument("And something really big", "in/more/path"));
 
         SearchResult result = inbox.search("small OR simple");
 
@@ -56,12 +56,21 @@ public class InboxTest {
     public void shouldUseImplicitDisjunction() {
         inbox.register(mockDocument("This is a rather small document", "in/other/path"));
         inbox.register(mockDocument("This is a simple document", "in/some/path"));
-        inbox.register(mockDocument("Neither small nor simple", "in/some/path"));
-        inbox.register(mockDocument("And something really big", "in/some/path"));
+        inbox.register(mockDocument("Neither small nor simple", "in/further/path"));
+        inbox.register(mockDocument("And something really big", "in/more/path"));
 
         SearchResult result = inbox.search("small simple");
 
         assertThat(result.getItems().size(), is(3));
+    }
+
+    @Test
+    public void shouldGetExistingItem() {
+        inbox.register(mockDocument("This is a simple document", "in/some/path"));
+
+        SearchResult result = inbox.get("in/some/path");
+
+        assertThat(result.getItems().size(), is(1));
     }
 
     private Document mockDocument(String content, String path) {

@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.io.File;
@@ -26,13 +25,13 @@ public class FileSystemScannerTest {
     @Mock
     private DocumentScanner documentScanner;
     @Mock
-    FileTypeChecker checker;
-    @InjectMocks
+    private FileTypeChecker checker;
+
     private FileSystemScanner fileSystemScanner;
 
     @Test
     public void shouldHandleEmptyDirectory() throws IOException {
-        fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
+        fileSystemScanner.scan();
 
         verify(inbox, never()).register(any());
     }
@@ -42,7 +41,7 @@ public class FileSystemScannerTest {
         when(checker.supported("something.pdf")).thenReturn(true);
         folder.newFile("something.pdf");
 
-        fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
+        fileSystemScanner.scan();
 
         verify(inbox).register(any(Document.class));
     }
@@ -53,7 +52,7 @@ public class FileSystemScannerTest {
         File subdir = folder.newFolder("subdir");
         new File(subdir, "something.pdf").createNewFile();
 
-        fileSystemScanner.scan(folder.getRoot().getAbsolutePath());
+        fileSystemScanner.scan();
 
         verify(inbox).register(any(Document.class));
     }
@@ -61,5 +60,6 @@ public class FileSystemScannerTest {
     @Before
     public void init() {
         initMocks(this);
+        this.fileSystemScanner = new FileSystemScanner(inbox, documentScanner, checker, folder.getRoot().getAbsolutePath());
     }
 }

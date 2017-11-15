@@ -11,6 +11,6 @@ public class Location {
     }
 
     public String getLocation() {
-        return uri.getRawPath();
+        return uri.getRawPath().replaceAll("\\\\", "/");
     }
 }

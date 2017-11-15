@@ -18,19 +18,19 @@ public class SearchResult {
 
     public static class SearchItem {
         private final String content;
-        private final String path;
+        private final String location;
 
-        public SearchItem(String content, String path) {
+        public SearchItem(String content, String location) {
             this.content = content;
-            this.path = path;
+            this.location = location;
         }
 
         public String getContent() {
             return content;
         }
 
-        public String getPath() {
-            return path;
+        public String getLocation() {
+            return location;
         }
     }
 }

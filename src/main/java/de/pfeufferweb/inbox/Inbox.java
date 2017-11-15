@@ -2,15 +2,18 @@ package de.pfeufferweb.inbox;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +40,10 @@ public class Inbox {
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             IndexWriter writer = new IndexWriter(index, config);
             org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
-            doc.add(new TextField("content", document.getContent(), Field.Store.YES));
             doc.add(new StringField("location", document.getLocation().getLocation(), Field.Store.YES));
-            writer.addDocument(doc);
+            doc.add(new LongPoint("modified", document.getLastModified()));
+            doc.add(new TextField("content", document.getContent(), Field.Store.YES));
+            writer.updateDocument(new Term("location", document.getLocation().getLocation()), doc);
             writer.commit();
             writer.close();
         } catch (Exception e) {
@@ -47,22 +51,35 @@ public class Inbox {
         }
     }
 
+    public SearchResult get(String location) {
+        try {
+            Query query = new TermQuery(new Term("location", location));
+            return executeQuery(query);
+        } catch (Exception e) {
+            throw new RuntimeException("error loading location " + location, e);
+        }
+    }
+
     public SearchResult search(String search) {
         try {
             Query query = new QueryParser("content", analyzer).parse(search);
-            DirectoryReader reader = DirectoryReader.open(index);
-            IndexSearcher indexSearcher = new IndexSearcher(reader);
-            TopScoreDocCollector collector = TopScoreDocCollector.create(100);
-            indexSearcher.search(query, collector);
-            ScoreDoc[] scoreDocs = collector.topDocs().scoreDocs;
-            List<SearchResult.SearchItem> items =
-                    Arrays.stream(scoreDocs)
-                            .map(d -> createSearchItem(indexSearcher, d))
-                            .collect(Collectors.toList());
-            return new SearchResult(items);
+            return executeQuery(query);
         } catch (Exception e) {
             throw new RuntimeException("error searching for " + search, e);
         }
+    }
+
+    private SearchResult executeQuery(Query query) throws IOException {
+        DirectoryReader reader = DirectoryReader.open(index);
+        IndexSearcher indexSearcher = new IndexSearcher(reader);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(100);
+        indexSearcher.search(query, collector);
+        ScoreDoc[] scoreDocs = collector.topDocs().scoreDocs;
+        List<SearchResult.SearchItem> items =
+                Arrays.stream(scoreDocs)
+                        .map(d -> createSearchItem(indexSearcher, d))
+                        .collect(Collectors.toList());
+        return new SearchResult(items);
     }
 
     private SearchResult.SearchItem createSearchItem(IndexSearcher indexSearcher, ScoreDoc d) {
