@@ -32,7 +32,7 @@ public class FileSystemScanner {
         this.directory = directory;
     }
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(fixedDelayString = "${scanIntervalMs}")
     public void scan() {
         LOG.info("start scan of " + directory);
         Path path = Paths.get(directory);
@@ -49,11 +49,16 @@ public class FileSystemScanner {
         list(path)
                 .filter(Files::isRegularFile)
                 .filter(this::supportedFileType)
+                .filter(this::notInInbox)
                 .map(documentScanner::read)
                 .forEach(inbox::register);
         list(path)
                 .filter(Files::isDirectory)
                 .forEach(this::scan);
+    }
+
+    private boolean notInInbox(Path file) {
+        return !inbox.contains(documentScanner.createLocation(file));
     }
 
     private boolean supportedFileType(Path path) {

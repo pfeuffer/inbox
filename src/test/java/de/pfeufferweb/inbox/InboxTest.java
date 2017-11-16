@@ -78,7 +78,7 @@ public class InboxTest {
         when(mock.getContent()).thenReturn(content);
         Location location = mock(Location.class);
         when(mock.getLocation()).thenReturn(location);
-        when(location.getLocation()).thenReturn(path);
+        when(location.getLocationString()).thenReturn(path);
         return mock;
     }
 }

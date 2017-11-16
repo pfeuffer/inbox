@@ -21,7 +21,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,25 +32,35 @@ public class Inbox {
     private final StandardAnalyzer analyzer = new StandardAnalyzer();
     private final Directory index;
 
+    private final Set<Location> knownDocuments = new HashSet<>();
+
     @Autowired
     public Inbox(Directory index) {
         this.index = index;
     }
 
     public void register(Document document) {
+        if (contains(document.getLocation())) {
+            return;
+        }
         try {
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             IndexWriter writer = new IndexWriter(index, config);
             org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
-            doc.add(new StringField("location", document.getLocation().getLocation(), Field.Store.YES));
+            doc.add(new StringField("location", document.getLocation().getLocationString(), Field.Store.YES));
             doc.add(new LongPoint("modified", document.getLastModified()));
             doc.add(new TextField("content", document.getContent(), Field.Store.YES));
-            writer.updateDocument(new Term("location", document.getLocation().getLocation()), doc);
+            writer.updateDocument(new Term("location", document.getLocation().getLocationString()), doc);
             writer.commit();
             writer.close();
+            knownDocuments.add(document.getLocation());
         } catch (Exception e) {
             throw new RuntimeException("could not index document", e);
         }
+    }
+
+    public boolean contains(Location location) {
+        return knownDocuments.contains(location);
     }
 
     public SearchResult get(String location) {
