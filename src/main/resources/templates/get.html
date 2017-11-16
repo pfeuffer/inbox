@@ -9,7 +9,7 @@
 <!--@thymesVar id="items" type="de.pfeufferweb.inbox.SearchResult.SearchItem"-->
 <ul th:each="item : ${items}">
     <li>
-        <span th:text="${item.location}">nothing</span>
+        <a th:href="'/read/' + ${item.uuid}" th:text="${item.location}">nothing</a>
         <br/>
         <span th:text="${item.content}">nothing</span>
     </li>

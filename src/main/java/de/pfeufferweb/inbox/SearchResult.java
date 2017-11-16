@@ -17,12 +17,18 @@ public class SearchResult {
     }
 
     public static class SearchItem {
+        private final String uuid;
         private final String content;
         private final String location;
 
-        public SearchItem(String content, String location) {
+        public SearchItem(String uuid, String content, String location) {
+            this.uuid = uuid;
             this.content = content;
             this.location = location;
+        }
+
+        public String getUuid() {
+            return uuid;
         }
 
         public String getContent() {

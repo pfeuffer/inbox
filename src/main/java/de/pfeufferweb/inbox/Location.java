@@ -11,8 +11,12 @@ public class Location {
         this.uri = file.toAbsolutePath().toUri();
     }
 
+    public Location(String location) {
+        this.uri = URI.create(location);
+    }
+
     public String getLocationString() {
-        return uri.getRawPath().replaceAll("\\\\", "/");
+        return uri.toString();
     }
 
     @Override

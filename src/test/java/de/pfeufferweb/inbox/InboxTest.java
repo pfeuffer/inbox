@@ -3,6 +3,10 @@ package de.pfeufferweb.inbox;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 
+import java.net.URI;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -66,15 +70,25 @@ public class InboxTest {
 
     @Test
     public void shouldGetExistingItem() {
-        inbox.register(mockDocument("This is a simple document", "in/some/path"));
+        inbox.register(mockDocument("This is a simple document", "/in/some/path"));
 
-        SearchResult result = inbox.get("in/some/path");
+        Optional<URI> result = inbox.getUri("/in/some/path");
 
-        assertThat(result.getItems().size(), is(1));
+        assertThat(result.get(), is(equalTo(URI.create("/in/some/path"))));
+    }
+
+    @Test
+    public void shouldNotFindNotExistingItem() {
+        inbox.register(mockDocument("This is a simple document", "/in/some/path"));
+
+        Optional<URI> result = inbox.getUri("/in/some/other");
+
+        assertThat(result.isPresent(), is(false));
     }
 
     private Document mockDocument(String content, String path) {
         Document mock = mock(Document.class);
+        when(mock.getUUID()).thenReturn(path);
         when(mock.getContent()).thenReturn(content);
         Location location = mock(Location.class);
         when(mock.getLocation()).thenReturn(location);

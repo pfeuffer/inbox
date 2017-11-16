@@ -20,9 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,7 @@ public class Inbox {
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             IndexWriter writer = new IndexWriter(index, config);
             org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
+            doc.add(new StringField("uuid", document.getUUID(), Field.Store.YES));
             doc.add(new StringField("location", document.getLocation().getLocationString(), Field.Store.YES));
             doc.add(new LongPoint("modified", document.getLastModified()));
             doc.add(new TextField("content", document.getContent(), Field.Store.YES));
@@ -63,12 +66,18 @@ public class Inbox {
         return knownDocuments.contains(location);
     }
 
-    public SearchResult get(String location) {
+
+    public Optional<URI> getUri(String uuid) {
         try {
-            Query query = new TermQuery(new Term("location", location));
-            return executeQuery(query);
+            Query query = new TermQuery(new Term("uuid", uuid));
+            return executeQuery(query)
+                    .getItems()
+                    .stream()
+                    .findFirst()
+                    .map(SearchResult.SearchItem::getLocation)
+                    .map(URI::create);
         } catch (Exception e) {
-            throw new RuntimeException("error loading location " + location, e);
+            throw new RuntimeException("error looking up uuid " + uuid, e);
         }
     }
 
@@ -95,7 +104,7 @@ public class Inbox {
     }
 
     private SearchResult.SearchItem createSearchItem(IndexSearcher indexSearcher, ScoreDoc d) {
-        return new SearchResult.SearchItem(readField(indexSearcher, d, "content"), readField(indexSearcher, d, "location"));
+        return new SearchResult.SearchItem(readField(indexSearcher, d, "uuid"), readField(indexSearcher, d, "content"), readField(indexSearcher, d, "location"));
     }
 
     private String readField(IndexSearcher indexSearcher, ScoreDoc doc, String field) {
