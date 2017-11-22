@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -22,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/")
 public class InboxController {
     private final Inbox inbox;
 
@@ -33,31 +31,17 @@ public class InboxController {
 
     @GetMapping(value = "/search", produces = {"application/json", "application/xml"})
     @ResponseBody
-    public SearchResult search(@RequestParam(name = "query", required = true) String query) {
+    public SearchResult search(@RequestParam("query") String query) {
         return inbox.search(query);
     }
 
     @GetMapping(value = "/search", produces = {"text/html"})
-    public String search(@RequestParam(name = "query", required = true) String query, Model model) {
+    public String search(@RequestParam("query") String query, Model model) {
         SearchResult result = search(query);
         model.addAttribute("items", result.getItems());
         model.addAttribute("size", result.getItems().size());
         return "get";
     }
-
-//    @GetMapping(value = "/get", produces = {"application/json", "application/xml"})
-//    @ResponseBody
-//    public SearchResult get(@RequestParam(name = "location", required = true) String location) {
-//        return inbox.get(location);
-//    }
-//
-//    @GetMapping(value = "/get", produces = {"text/html"})
-//    public String get(@RequestParam(name = "location", required = true) String location, Model model) {
-//        SearchResult result = get(location);
-//        model.addAttribute("items", result.getItems());
-//        model.addAttribute("size", result.getItems().size());
-//        return "get";
-//    }
 
     @GetMapping("/read/{uuid}")
     public ResponseEntity<InputStreamResource> readFile(@PathVariable(name = "uuid") String uuid) {
