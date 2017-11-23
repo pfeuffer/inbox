@@ -63,7 +63,17 @@ public class Inbox {
     }
 
     public boolean contains(Location location) {
-        return knownDocuments.contains(location);
+        if (knownDocuments.contains(location)) {
+            return true;
+        } else {
+            Optional<URI> uri = getUri(location.getLocationString());
+            if (uri.isPresent()) {
+                knownDocuments.add(new Location(uri.get()));
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
 

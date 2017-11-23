@@ -8,11 +8,11 @@ public class Location {
     private URI uri;
 
     public Location(Path file) {
-        this.uri = file.toAbsolutePath().toUri();
+        this(file.toAbsolutePath().toUri());
     }
 
-    public Location(String location) {
-        this.uri = URI.create(location);
+    public Location(URI uri) {
+        this.uri = uri;
     }
 
     public String getLocationString() {
