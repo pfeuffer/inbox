@@ -45,7 +45,7 @@ public class InboxController {
 
     @GetMapping("/read/{uuid}")
     public ResponseEntity<InputStreamResource> readFile(@PathVariable(name = "uuid") String uuid) {
-        Optional<URI> searchResult = inbox.getUri(uuid);
+        Optional<URI> searchResult = inbox.getByUuid(uuid);
         if (!searchResult.isPresent()) {
             return ResponseEntity.notFound().build();
         }

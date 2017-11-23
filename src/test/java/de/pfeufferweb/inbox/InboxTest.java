@@ -72,7 +72,7 @@ public class InboxTest {
     public void shouldGetExistingItem() {
         inbox.register(mockDocument("This is a simple document", "/in/some/path"));
 
-        Optional<URI> result = inbox.getUri("/in/some/path");
+        Optional<URI> result = inbox.getByUuid("/in/some/path");
 
         assertThat(result.get(), is(equalTo(URI.create("/in/some/path"))));
     }
@@ -81,7 +81,7 @@ public class InboxTest {
     public void shouldNotFindNotExistingItem() {
         inbox.register(mockDocument("This is a simple document", "/in/some/path"));
 
-        Optional<URI> result = inbox.getUri("/in/some/other");
+        Optional<URI> result = inbox.getByUuid("/in/some/other");
 
         assertThat(result.isPresent(), is(false));
     }

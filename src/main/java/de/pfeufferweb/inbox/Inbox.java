@@ -6,6 +6,7 @@ import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -66,7 +67,7 @@ public class Inbox {
         if (knownDocuments.contains(location)) {
             return true;
         } else {
-            Optional<URI> uri = getUri(location.getLocationString());
+            Optional<URI> uri = getByLocation(location.getLocationString());
             if (uri.isPresent()) {
                 knownDocuments.add(new Location(uri.get()));
                 return true;
@@ -76,8 +77,23 @@ public class Inbox {
         }
     }
 
+    public Optional<URI> getByLocation(String location) {
+        try {
+            Query query = new TermQuery(new Term("location", location));
+            return executeQuery(query)
+                    .getItems()
+                    .stream()
+                    .findFirst()
+                    .map(SearchResult.SearchItem::getLocation)
+                    .map(URI::create);
+        } catch (IndexNotFoundException e) {
+            return Optional.empty();
+        } catch (Exception e) {
+            throw new RuntimeException("error looking up location " + location, e);
+        }
+    }
 
-    public Optional<URI> getUri(String uuid) {
+    public Optional<URI> getByUuid(String uuid) {
         try {
             Query query = new TermQuery(new Term("uuid", uuid));
             return executeQuery(query)
@@ -86,8 +102,10 @@ public class Inbox {
                     .findFirst()
                     .map(SearchResult.SearchItem::getLocation)
                     .map(URI::create);
+        } catch (IndexNotFoundException e) {
+            return Optional.empty();
         } catch (Exception e) {
-            throw new RuntimeException("error looking up uuid " + uuid, e);
+            throw new RuntimeException("error looking up by uuid " + uuid, e);
         }
     }
 
@@ -110,6 +128,7 @@ public class Inbox {
                 Arrays.stream(scoreDocs)
                         .map(d -> createSearchItem(indexSearcher, d))
                         .collect(Collectors.toList());
+        reader.close();
         return new SearchResult(items);
     }
 
