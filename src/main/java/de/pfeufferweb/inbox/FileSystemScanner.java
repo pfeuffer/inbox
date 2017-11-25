@@ -51,7 +51,7 @@ public class FileSystemScanner {
                 .filter(this::supportedFileType)
                 .filter(this::notInInbox)
                 .map(documentScanner::read)
-                .forEach(inbox::register);
+                .forEach(o -> o.ifPresent(inbox::register));
         list(path)
                 .filter(Files::isDirectory)
                 .forEach(this::scan);

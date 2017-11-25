@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -22,7 +23,7 @@ public class DocumentScannerTest {
     public void shouldParseWordFile() throws IOException {
         Path wordFile = copy("Simple_word_file.docx");
 
-        Document wordDocument = new DocumentScanner().read(wordFile);
+        Document wordDocument = new DocumentScanner().read(wordFile).get();
 
         assertThat(cleanedContent(wordDocument), is(equalTo("Simple word file")));
         assertThat(wordDocument.getLocation().getLocationString()
@@ -33,11 +34,20 @@ public class DocumentScannerTest {
     public void shouldParsePdfFile() throws IOException {
         Path pdfFile = copy("Simple_pdf_file.pdf");
 
-        Document wordDocument = new DocumentScanner().read(pdfFile);
+        Document wordDocument = new DocumentScanner().read(pdfFile).get();
 
         assertThat(cleanedContent(wordDocument), is(equalTo("Simple pdf file")));
         assertThat(wordDocument.getLocation().getLocationString()
                 .endsWith("Simple_pdf_file.pdf"), is(true));
+    }
+
+    @Test
+    public void shouldNotFailForIllegalFile() throws IOException {
+        Path pdfFile = copy("illegal.pdf");
+
+        Optional<Document> illegal = new DocumentScanner().read(pdfFile);
+
+        assertThat(illegal.isPresent(), is(false));
     }
 
     private Path copy(String fileName) throws IOException {
