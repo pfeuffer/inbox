@@ -38,18 +38,18 @@ public class InboxController {
     @GetMapping(value = "/search", produces = {"text/html"})
     public String search(@RequestParam("query") String query, Model model) {
         SearchResult result = search(query);
-        model.addAttribute("items", result.getItems());
-        model.addAttribute("size", result.getItems().size());
+        model.addAttribute("items", result.getDocuments());
+        model.addAttribute("size", result.getDocuments().size());
         return "get";
     }
 
     @GetMapping("/read/{uuid}")
     public ResponseEntity<InputStreamResource> readFile(@PathVariable(name = "uuid") String uuid) {
-        Optional<SearchResult.SearchItem> searchResult = inbox.getByUuid(uuid);
+        Optional<Document> searchResult = inbox.getByUuid(uuid);
         if (!searchResult.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        Path filePath = Paths.get(URI.create(searchResult.get().getLocation()));
+        Path filePath = Paths.get(URI.create(searchResult.get().getLocation().getLocationString()));
         long size;
         InputStream inputStream;
         try {
@@ -58,7 +58,7 @@ public class InboxController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
         }
-        String type = searchResult.get().getType();
+        String type = searchResult.get().getFileType();
         return ResponseEntity.ok()
                 .contentLength(size)
                 .contentType(determineContentType(type))

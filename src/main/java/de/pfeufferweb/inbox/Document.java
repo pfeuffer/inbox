@@ -39,6 +39,7 @@ public class Document {
     }
 
     public static class Builder {
+        private String uuid = UUID.randomUUID().toString();
         private Location location;
         private String content;
         private String fileType;
@@ -64,8 +65,13 @@ public class Document {
             return this;
         }
 
+        public Builder uuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
         public Document build() {
-            return new Document(UUID.randomUUID().toString(), location, content, fileType, lastModified);
+            return new Document(uuid, location, content, fileType, lastModified);
         }
     }
 }

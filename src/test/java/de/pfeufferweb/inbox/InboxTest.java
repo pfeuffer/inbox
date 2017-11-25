@@ -21,7 +21,7 @@ public class InboxTest {
 
         SearchResult result = inbox.search("complex");
 
-        assertThat(result.getItems().size(), is(0));
+        assertThat(result.getDocuments().size(), is(0));
     }
 
     @Test
@@ -30,7 +30,7 @@ public class InboxTest {
 
         SearchResult result = inbox.search("document");
 
-        assertThat(result.getItems().size(), is(1));
+        assertThat(result.getDocuments().size(), is(1));
     }
 
     @Test
@@ -40,7 +40,7 @@ public class InboxTest {
 
         SearchResult result = inbox.search("document AND simple");
 
-        assertThat(result.getItems().size(), is(1));
+        assertThat(result.getDocuments().size(), is(1));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class InboxTest {
 
         SearchResult result = inbox.search("small OR simple");
 
-        assertThat(result.getItems().size(), is(3));
+        assertThat(result.getDocuments().size(), is(3));
     }
 
     @Test
@@ -64,16 +64,16 @@ public class InboxTest {
 
         SearchResult result = inbox.search("small simple");
 
-        assertThat(result.getItems().size(), is(3));
+        assertThat(result.getDocuments().size(), is(3));
     }
 
     @Test
     public void shouldGetExistingItem() {
         inbox.register(mockDocument("This is a simple document", "/in/some/path"));
 
-        Optional<SearchResult.SearchItem> result = inbox.getByUuid("/in/some/path");
+        Optional<Document> result = inbox.getByUuid("/in/some/path");
 
-        assertThat(result.get().getLocation(), is(equalTo("/in/some/path")));
+        assertThat(result.get().getLocation().getLocationString(), is(equalTo("/in/some/path")));
     }
 
     @Test

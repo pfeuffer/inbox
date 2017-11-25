@@ -1,10 +1,8 @@
 package de.pfeufferweb.inbox;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
+import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
@@ -20,6 +18,7 @@ import org.apache.lucene.store.Directory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.print.Doc;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -32,6 +31,12 @@ import java.util.stream.Collectors;
 @Component
 public class Inbox {
 
+    public static final String FIELD_NAME_UUID = "uuid";
+    public static final String FIELD_NAME_CONTENT = "content";
+    public static final String FIELD_NAME_LOCATION = "location";
+    public static final String FIELD_NAME_TYPE = "type";
+    public static final String FIELD_NAME_MODIFIED = "modified";
+    public static final String FIELD_NAME_MODIFIED_INDEX = "modifiedIndex";
     private final StandardAnalyzer analyzer = new StandardAnalyzer();
     private final Directory index;
 
@@ -50,12 +55,13 @@ public class Inbox {
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             IndexWriter writer = new IndexWriter(index, config);
             org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
-            doc.add(new StringField("uuid", document.getUUID(), Field.Store.YES));
-            doc.add(new StringField("location", document.getLocation().getLocationString(), Field.Store.YES));
-            doc.add(new StringField("type", document.getFileType(), Field.Store.YES));
-            doc.add(new LongPoint("modified", document.getLastModified()));
-            doc.add(new TextField("content", document.getContent(), Field.Store.YES));
-            writer.updateDocument(new Term("location", document.getLocation().getLocationString()), doc);
+            doc.add(new StringField(FIELD_NAME_UUID, document.getUUID(), Store.YES));
+            doc.add(new StringField(FIELD_NAME_LOCATION, document.getLocation().getLocationString(), Store.YES));
+            doc.add(new StringField(FIELD_NAME_TYPE, document.getFileType(), Store.YES));
+            doc.add(new LongPoint(FIELD_NAME_MODIFIED_INDEX, document.getLastModified()));
+            doc.add(new StoredField(FIELD_NAME_MODIFIED, document.getLastModified()));
+            doc.add(new TextField(FIELD_NAME_CONTENT, document.getContent(), Store.YES));
+            writer.updateDocument(new Term(FIELD_NAME_LOCATION, document.getLocation().getLocationString()), doc);
             writer.commit();
             writer.close();
             knownDocuments.add(document.getLocation());
@@ -80,12 +86,13 @@ public class Inbox {
 
     public Optional<URI> getByLocation(String location) {
         try {
-            Query query = new TermQuery(new Term("location", location));
+            Query query = new TermQuery(new Term(FIELD_NAME_LOCATION, location));
             return executeQuery(query)
-                    .getItems()
+                    .getDocuments()
                     .stream()
                     .findFirst()
-                    .map(SearchResult.SearchItem::getLocation)
+                    .map(Document::getLocation)
+                    .map(Location::getLocationString)
                     .map(URI::create);
         } catch (IndexNotFoundException e) {
             return Optional.empty();
@@ -94,11 +101,11 @@ public class Inbox {
         }
     }
 
-    public Optional<SearchResult.SearchItem> getByUuid(String uuid) {
+    public Optional<Document> getByUuid(String uuid) {
         try {
-            Query query = new TermQuery(new Term("uuid", uuid));
+            Query query = new TermQuery(new Term(FIELD_NAME_UUID, uuid));
             return executeQuery(query)
-                    .getItems()
+                    .getDocuments()
                     .stream()
                     .findFirst();
         } catch (IndexNotFoundException e) {
@@ -110,7 +117,7 @@ public class Inbox {
 
     public SearchResult search(String search) {
         try {
-            Query query = new QueryParser("content", analyzer).parse(search);
+            Query query = new QueryParser(FIELD_NAME_CONTENT, analyzer).parse(search);
             return executeQuery(query);
         } catch (Exception e) {
             throw new RuntimeException("error searching for " + search, e);
@@ -123,7 +130,7 @@ public class Inbox {
         TopScoreDocCollector collector = TopScoreDocCollector.create(100);
         indexSearcher.search(query, collector);
         ScoreDoc[] scoreDocs = collector.topDocs().scoreDocs;
-        List<SearchResult.SearchItem> items =
+        List<Document> items =
                 Arrays.stream(scoreDocs)
                         .map(d -> createSearchItem(indexSearcher, d))
                         .collect(Collectors.toList());
@@ -131,8 +138,14 @@ public class Inbox {
         return new SearchResult(items);
     }
 
-    private SearchResult.SearchItem createSearchItem(IndexSearcher indexSearcher, ScoreDoc d) {
-        return new SearchResult.SearchItem(readField(indexSearcher, d, "uuid"), readField(indexSearcher, d, "content"), readField(indexSearcher, d, "location"), readField(indexSearcher, d, "type"));
+    private Document createSearchItem(IndexSearcher indexSearcher, ScoreDoc d) {
+        return new Document.Builder()
+                .uuid(readField(indexSearcher, d, FIELD_NAME_UUID))
+                .content(readField(indexSearcher, d, FIELD_NAME_CONTENT))
+                .location(new Location(URI.create(readField(indexSearcher, d, FIELD_NAME_LOCATION))))
+                .fileType(readField(indexSearcher, d, FIELD_NAME_TYPE))
+                .lastModified(Long.parseLong(readField(indexSearcher, d, FIELD_NAME_MODIFIED)))
+                .build();
     }
 
     private String readField(IndexSearcher indexSearcher, ScoreDoc doc, String field) {
