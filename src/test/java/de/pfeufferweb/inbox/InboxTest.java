@@ -3,7 +3,6 @@ package de.pfeufferweb.inbox;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -72,16 +71,16 @@ public class InboxTest {
     public void shouldGetExistingItem() {
         inbox.register(mockDocument("This is a simple document", "/in/some/path"));
 
-        Optional<URI> result = inbox.getByUuid("/in/some/path");
+        Optional<SearchResult.SearchItem> result = inbox.getByUuid("/in/some/path");
 
-        assertThat(result.get(), is(equalTo(URI.create("/in/some/path"))));
+        assertThat(result.get().getLocation(), is(equalTo("/in/some/path")));
     }
 
     @Test
     public void shouldNotFindNotExistingItem() {
         inbox.register(mockDocument("This is a simple document", "/in/some/path"));
 
-        Optional<URI> result = inbox.getByUuid("/in/some/other");
+        Optional<?> result = inbox.getByUuid("/in/some/other");
 
         assertThat(result.isPresent(), is(false));
     }

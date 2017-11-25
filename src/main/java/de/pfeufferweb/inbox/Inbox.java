@@ -94,15 +94,13 @@ public class Inbox {
         }
     }
 
-    public Optional<URI> getByUuid(String uuid) {
+    public Optional<SearchResult.SearchItem> getByUuid(String uuid) {
         try {
             Query query = new TermQuery(new Term("uuid", uuid));
             return executeQuery(query)
                     .getItems()
                     .stream()
-                    .findFirst()
-                    .map(SearchResult.SearchItem::getLocation)
-                    .map(URI::create);
+                    .findFirst();
         } catch (IndexNotFoundException e) {
             return Optional.empty();
         } catch (Exception e) {

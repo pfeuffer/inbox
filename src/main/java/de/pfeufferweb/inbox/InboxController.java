@@ -45,11 +45,11 @@ public class InboxController {
 
     @GetMapping("/read/{uuid}")
     public ResponseEntity<InputStreamResource> readFile(@PathVariable(name = "uuid") String uuid) {
-        Optional<URI> searchResult = inbox.getByUuid(uuid);
+        Optional<SearchResult.SearchItem> searchResult = inbox.getByUuid(uuid);
         if (!searchResult.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        Path filePath = Paths.get(searchResult.get());
+        Path filePath = Paths.get(URI.create(searchResult.get().getLocation()));
         long size;
         InputStream inputStream;
         try {
@@ -61,6 +61,7 @@ public class InboxController {
         return ResponseEntity.ok()
                 .contentLength(size)
                 .contentType(determineContentType(filePath.toString()))
+                .header("Content-Disposition", "attachment; filename=" + uuid + "." + searchResult.get().getType())
                 .body(new InputStreamResource(inputStream));
 
     }
