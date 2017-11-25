@@ -20,4 +20,10 @@ public class FileTypeCheckerTest {
         FileTypeChecker fileTypeChecker = new FileTypeChecker(Arrays.asList("pdf", "doc"));
         assertThat(fileTypeChecker.supported("in/some/path/there.is.a.file.docx"), is(false));
     }
+
+    @Test
+    public void shouldRejectUnsupportedTypeEvenIfItEndsWithAAcceptedType() {
+        FileTypeChecker fileTypeChecker = new FileTypeChecker(Arrays.asList("pdf", "doc"));
+        assertThat(fileTypeChecker.supported("in/some/path/there.is.a.file.xdoc"), is(false));
+    }
 }

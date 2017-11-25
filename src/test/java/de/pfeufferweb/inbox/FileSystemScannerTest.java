@@ -6,14 +6,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 
+import javax.print.Doc;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class FileSystemScannerTest {
@@ -80,5 +80,6 @@ public class FileSystemScannerTest {
         initMocks(this);
         this.fileSystemScanner = new FileSystemScanner(inbox, documentScanner, checker, folder.getRoot().getAbsolutePath());
         when(documentScanner.createLocation(any(Path.class))).thenReturn(location);
+        when(documentScanner.read(any(Path.class))).thenReturn(Optional.of(mock(Document.class)));
     }
 }

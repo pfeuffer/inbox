@@ -7,12 +7,14 @@ public class Document {
     private final String uuid;
     private final Location location;
     private final String content;
+    private final String fileType;
     private final long lastModified;
 
-    Document(Location location, String content, long lastModified) {
+    Document(Location location, String content, String fileType, long lastModified) {
         this.uuid = UUID.randomUUID().toString();
         this.location = location;
         this.content = content;
+        this.fileType = fileType;
         this.lastModified = lastModified;
     }
 
@@ -22,6 +24,10 @@ public class Document {
 
     public String getContent() {
         return content;
+    }
+
+    public String getFileType() {
+        return fileType;
     }
 
     public long getLastModified() {

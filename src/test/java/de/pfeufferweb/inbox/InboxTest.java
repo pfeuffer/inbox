@@ -90,6 +90,7 @@ public class InboxTest {
         Document mock = mock(Document.class);
         when(mock.getUUID()).thenReturn(path);
         when(mock.getContent()).thenReturn(content);
+        when(mock.getFileType()).thenReturn("");
         Location location = mock(Location.class);
         when(mock.getLocation()).thenReturn(location);
         when(location.getLocationString()).thenReturn(path);

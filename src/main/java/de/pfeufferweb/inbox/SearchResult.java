@@ -20,11 +20,13 @@ public class SearchResult {
         private final String uuid;
         private final String content;
         private final String location;
+        private final String type;
 
-        public SearchItem(String uuid, String content, String location) {
+        public SearchItem(String uuid, String content, String location, String type) {
             this.uuid = uuid;
             this.content = content;
             this.location = location;
+            this.type = type;
         }
 
         public String getUuid() {
@@ -37,6 +39,10 @@ public class SearchResult {
 
         public String getLocation() {
             return location;
+        }
+
+        public String getType() {
+            return type;
         }
     }
 }

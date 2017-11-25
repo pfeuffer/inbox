@@ -10,6 +10,7 @@ public class FileTypeChecker {
     }
 
     public boolean supported(String fileName) {
-        return supportedTypes.stream().anyMatch(t -> fileName.toLowerCase().endsWith(t));
+        String fileType = new FileTypeExtractor().extractFileType(fileName);
+        return supportedTypes.stream().anyMatch(t -> t.equalsIgnoreCase(fileType));
     }
 }

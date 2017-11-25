@@ -52,6 +52,7 @@ public class Inbox {
             org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
             doc.add(new StringField("uuid", document.getUUID(), Field.Store.YES));
             doc.add(new StringField("location", document.getLocation().getLocationString(), Field.Store.YES));
+            doc.add(new StringField("type", document.getFileType(), Field.Store.YES));
             doc.add(new LongPoint("modified", document.getLastModified()));
             doc.add(new TextField("content", document.getContent(), Field.Store.YES));
             writer.updateDocument(new Term("location", document.getLocation().getLocationString()), doc);
@@ -133,7 +134,7 @@ public class Inbox {
     }
 
     private SearchResult.SearchItem createSearchItem(IndexSearcher indexSearcher, ScoreDoc d) {
-        return new SearchResult.SearchItem(readField(indexSearcher, d, "uuid"), readField(indexSearcher, d, "content"), readField(indexSearcher, d, "location"));
+        return new SearchResult.SearchItem(readField(indexSearcher, d, "uuid"), readField(indexSearcher, d, "content"), readField(indexSearcher, d, "location"), readField(indexSearcher, d, "type"));
     }
 
     private String readField(IndexSearcher indexSearcher, ScoreDoc doc, String field) {
