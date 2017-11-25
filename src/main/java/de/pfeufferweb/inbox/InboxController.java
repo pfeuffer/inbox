@@ -58,22 +58,33 @@ public class InboxController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
         }
+        String type = searchResult.get().getType();
         return ResponseEntity.ok()
                 .contentLength(size)
-                .contentType(determineContentType(filePath.toString()))
-                .header("Content-Disposition", "attachment; filename=" + uuid + "." + searchResult.get().getType())
+                .contentType(determineContentType(type))
+                .header("Content-Disposition", "attachment; filename=" + uuid + "." + type)
                 .body(new InputStreamResource(inputStream));
 
     }
 
-    private MediaType determineContentType(String location) {
-        String cleanLocation = location.toLowerCase().trim();
-        if (cleanLocation.endsWith(".pdf")) {
-            return MediaType.APPLICATION_PDF;
-        } else if (cleanLocation.endsWith(".doc")) {
-            return MediaType.valueOf("application/msword");
-        } else {
-            return MediaType.APPLICATION_OCTET_STREAM;
+    private MediaType determineContentType(String type) {
+        switch (type.toLowerCase()) {
+            case "pdf":
+                return MediaType.APPLICATION_PDF;
+            case "doc":
+                return MediaType.valueOf("application/msword");
+            case "docx":
+                return MediaType.valueOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            case "xls":
+                return MediaType.valueOf("application/vnd.ms-excel");
+            case "xlsx":
+                return MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            case "odt":
+                return MediaType.valueOf("application/vnd.oasis.opendocument.text");
+            case "ods":
+                return MediaType.valueOf("application/vnd.oasis.opendocument.spreadsheet");
+            default:
+                return MediaType.APPLICATION_OCTET_STREAM;
         }
     }
 }

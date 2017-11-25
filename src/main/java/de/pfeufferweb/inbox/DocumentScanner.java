@@ -20,7 +20,13 @@ public class DocumentScanner {
         LOG.info("reading file " + file);
         try {
             String content = new Tika().parseToString(file.toFile());
-            return of(new Document(createLocation(file), content, getFileType(file), Files.getLastModifiedTime(file).toMillis()));
+            return of(
+                    new Document.Builder()
+                            .location(createLocation(file))
+                            .content(content)
+                            .fileType(getFileType(file))
+                            .lastModified(Files.getLastModifiedTime(file).toMillis())
+                            .build());
         } catch (Exception e) {
             LOG.info("could not parse file " + file.toAbsolutePath(), e);
             return empty();

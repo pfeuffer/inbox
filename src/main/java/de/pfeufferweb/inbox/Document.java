@@ -10,8 +10,8 @@ public class Document {
     private final String fileType;
     private final long lastModified;
 
-    Document(Location location, String content, String fileType, long lastModified) {
-        this.uuid = UUID.randomUUID().toString();
+    private Document(String uuid, Location location, String content, String fileType, long lastModified) {
+        this.uuid = uuid;
         this.location = location;
         this.content = content;
         this.fileType = fileType;
@@ -36,5 +36,36 @@ public class Document {
 
     public String getUUID() {
         return uuid;
+    }
+
+    public static class Builder {
+        private Location location;
+        private String content;
+        private String fileType;
+        private long lastModified;
+
+        public Builder location(Location location) {
+            this.location = location;
+            return this;
+        }
+
+        public Builder content(String content) {
+            this.content = content;
+            return this;
+        }
+
+        public Builder fileType(String fileType) {
+            this.fileType = fileType;
+            return this;
+        }
+
+        public Builder lastModified(long lastModified) {
+            this.lastModified = lastModified;
+            return this;
+        }
+
+        public Document build() {
+            return new Document(UUID.randomUUID().toString(), location, content, fileType, lastModified);
+        }
     }
 }
